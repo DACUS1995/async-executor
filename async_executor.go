@@ -5,11 +5,12 @@ import (
 )
 
 type executor struct {
-	wg                  sync.WaitGroup
+	wg                  *sync.WaitGroup
 	globalJobQueue      chan *Job
 	globalResponseQueue chan *ResponseObject
 	workerCounter       int
 	jobCounter          int
+	workers             []*Worker
 }
 
 type Executor interface {
@@ -21,19 +22,21 @@ type Executor interface {
 
 func NewExecutor(queueSize int) *executor {
 	return &executor{
-		sync.WaitGroup{},
+		&sync.WaitGroup{},
 		make(chan *Job, queueSize),
 		make(chan *ResponseObject, queueSize),
 		0, 0,
+		[]*Worker{},
 	}
 }
 
 func (exec *executor) StartExecutor(numWorkers int) {
 	for i := 0; i < numWorkers; i++ {
 		worker := NewWorker(exec.workerCounter, exec.globalJobQueue, exec.globalResponseQueue)
+		exec.workers = append(exec.workers, worker)
 		exec.wg.Add(1)
 		exec.workerCounter++
-		go worker.startWorker(&exec.wg)
+		go worker.start(exec.wg)
 	}
 
 	return
@@ -53,11 +56,15 @@ func (exec *executor) addGlobalJob(job *Job) {
 }
 
 func (exec *executor) StopExecutor() {
-	exec.waitAllWorkers(exec.globalJobQueue)
+	exec.waitAllWorkers()
 	return
 }
 
-func (exec *executor) waitAllWorkers(globalJobQueue chan *Job) {
-	close(globalJobQueue)
+func (exec *executor) waitAllWorkers() {
+	close(exec.globalJobQueue)
+
+	for _, worker := range exec.workers {
+		worker.stop()
+	}
 	exec.wg.Wait()
 }

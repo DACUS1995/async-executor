@@ -1,6 +1,9 @@
 package asyncexecutor
 
-import "sync"
+import (
+	"fmt"
+	"sync"
+)
 
 type Worker struct {
 	id                  int
@@ -10,24 +13,36 @@ type Worker struct {
 	responseQueue       chan *ResponseObject
 }
 
-func NewWorker(id int, globalJobQueue chan *Job, globalResponseQueue chan *ResponseObject) *Worker {
+func NewWorker(workerID int, globalJobQueue chan *Job, globalResponseQueue chan *ResponseObject) *Worker {
 	return &Worker{
-		id,
+		workerID,
 		globalJobQueue,
 		globalResponseQueue,
 		make(chan *Job, 10),
 		make(chan *ResponseObject, 10)}
 }
 
-func (worker *Worker) startWorker(wg *sync.WaitGroup) {
+func (worker *Worker) start(wg *sync.WaitGroup) {
 	defer wg.Done()
+
+	fmt.Printf("Started worker [id = %v] \n", worker.id)
 
 	for {
 		select {
-		case job := <-worker.globalJobQueue:
+		case job, ok := <-worker.globalJobQueue:
+			if !ok {
+				return
+			}
 			worker.globalResponseQueue <- job.call()
-		case job := <-worker.jobQueue:
+		case job, ok := <-worker.jobQueue:
+			if !ok {
+				return
+			}
 			worker.responseQueue <- job.call()
 		}
 	}
+}
+
+func (worker *Worker) stop() {
+	close(worker.jobQueue)
 }
