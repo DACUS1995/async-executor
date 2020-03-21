@@ -42,13 +42,16 @@ func (exec *executor) StartExecutor(numWorkers int) {
 	return
 }
 
-func (exec *executor) CreateJob(function callableType, parameters []interface{}) {
+func (exec *executor) CreateJob(function callableType, parameters []interface{}) int {
+	newJobID := exec.jobCounter
 	exec.addGlobalJob(NewJob(
-		exec.jobCounter,
+		newJobID,
 		function,
 		&parameterObject{parameters},
 	))
 	exec.jobCounter++
+
+	return newJobID
 }
 
 func (exec *executor) addGlobalJob(job *Job) {

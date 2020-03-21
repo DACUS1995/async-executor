@@ -54,6 +54,48 @@ func TestMultipleJobsExecutor(t *testing.T) {
 	executor.StopExecutor()
 }
 
+func TestCompletionMultipleJobsExecutor(t *testing.T) {
+	expected := "Done"
+	queueSize := 10
+	numWorkers := 5
+	numJobs := 10
+	jobs := make(map[int]bool)
+
+	executor := NewExecutor(queueSize)
+	executor.StartExecutor(numWorkers)
+
+	testFunction := func(str string) (string, error) {
+		return str, nil
+	}
+
+	for i := 0; i < numJobs; i++ {
+		jobID := executor.CreateJob(
+			testFunction,
+			[]interface{}{"Done"},
+		)
+		jobs[jobID] = false
+	}
+
+	for i := 0; i < numJobs; i++ {
+		if resObj := <-executor.GlobalResponseQueue; resObj.responses[0] != expected {
+			jobs[resObj.id] = true
+		}
+	}
+
+	unfinishedJobsCounter := 0
+	for _, v := range jobs {
+		if v != false {
+			unfinishedJobsCounter++
+		}
+	}
+
+	if unfinishedJobsCounter != 0 {
+		t.Errorf("[%v] unfinished jobs are stuck in the executor.", unfinishedJobsCounter)
+	}
+
+	executor.StopExecutor()
+}
+
 func Benchmark(b *testing.B) {
 	expected := "Done"
 	queueSize := 10
