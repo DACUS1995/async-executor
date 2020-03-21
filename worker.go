@@ -8,16 +8,16 @@ import (
 type Worker struct {
 	id                  int
 	globalJobQueue      chan *Job
-	globalResponseQueue chan *ResponseObject
+	GlobalResponseQueue chan *ResponseObject
 	jobQueue            chan *Job
 	responseQueue       chan *ResponseObject
 }
 
-func NewWorker(workerID int, globalJobQueue chan *Job, globalResponseQueue chan *ResponseObject) *Worker {
+func NewWorker(workerID int, globalJobQueue chan *Job, GlobalResponseQueue chan *ResponseObject) *Worker {
 	return &Worker{
 		workerID,
 		globalJobQueue,
-		globalResponseQueue,
+		GlobalResponseQueue,
 		make(chan *Job, 10),
 		make(chan *ResponseObject, 10)}
 }
@@ -33,7 +33,7 @@ func (worker *Worker) start(wg *sync.WaitGroup) {
 			if !ok {
 				return
 			}
-			worker.globalResponseQueue <- job.call()
+			worker.GlobalResponseQueue <- job.call()
 		case job, ok := <-worker.jobQueue:
 			if !ok {
 				return
@@ -44,5 +44,6 @@ func (worker *Worker) start(wg *sync.WaitGroup) {
 }
 
 func (worker *Worker) stop() {
+	fmt.Printf("Stopping worker [id = %v] \n", worker.id)
 	close(worker.jobQueue)
 }

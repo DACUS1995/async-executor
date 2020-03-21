@@ -7,7 +7,7 @@ import (
 type executor struct {
 	wg                  *sync.WaitGroup
 	globalJobQueue      chan *Job
-	globalResponseQueue chan *ResponseObject
+	GlobalResponseQueue chan *ResponseObject
 	workerCounter       int
 	jobCounter          int
 	workers             []*Worker
@@ -32,7 +32,7 @@ func NewExecutor(queueSize int) *executor {
 
 func (exec *executor) StartExecutor(numWorkers int) {
 	for i := 0; i < numWorkers; i++ {
-		worker := NewWorker(exec.workerCounter, exec.globalJobQueue, exec.globalResponseQueue)
+		worker := NewWorker(exec.workerCounter, exec.globalJobQueue, exec.GlobalResponseQueue)
 		exec.workers = append(exec.workers, worker)
 		exec.wg.Add(1)
 		exec.workerCounter++
