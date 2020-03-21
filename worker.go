@@ -33,12 +33,14 @@ func (worker *Worker) start(wg *sync.WaitGroup) {
 			if !ok {
 				return
 			}
-			worker.GlobalResponseQueue <- job.call()
+			response := job.call()
+			worker.GlobalResponseQueue <- response
 		case job, ok := <-worker.jobQueue:
 			if !ok {
 				return
 			}
-			worker.responseQueue <- job.call()
+			response := job.call()
+			worker.responseQueue <- response
 		}
 	}
 }

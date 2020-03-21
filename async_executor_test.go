@@ -69,11 +69,11 @@ func TestCompletionMultipleJobsExecutor(t *testing.T) {
 	}
 
 	for i := 0; i < numJobs; i++ {
-		jobID := executor.CreateJob(
+		newJob := executor.CreateJob(
 			testFunction,
 			[]interface{}{"Done"},
 		)
-		jobs[jobID] = false
+		jobs[newJob.id] = false
 	}
 
 	for i := 0; i < numJobs; i++ {

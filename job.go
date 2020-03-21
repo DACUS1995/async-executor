@@ -20,10 +20,11 @@ type CallableJob interface {
 type callableType interface{}
 
 type Job struct {
-	id       int
-	paramObj *parameterObject
-	response *ResponseObject
-	callable callableType
+	id              int
+	paramObj        *parameterObject
+	response        *ResponseObject
+	responseChannel chan *ResponseObject
+	callable        callableType
 }
 
 func NewJob(id int, function callableType, paramObject *parameterObject) *Job {
@@ -31,8 +32,13 @@ func NewJob(id int, function callableType, paramObject *parameterObject) *Job {
 		id,
 		paramObject,
 		new(ResponseObject),
+		make(chan *ResponseObject, 1),
 		function,
 	}
+}
+
+func (job *Job) Await() *ResponseObject {
+	return <-job.responseChannel
 }
 
 func (job *Job) call() *ResponseObject {
@@ -51,8 +57,12 @@ func (job *Job) call() *ResponseObject {
 		responses = append(responses, value.Interface())
 	}
 
-	return &ResponseObject{
+	response := &ResponseObject{
 		job.id,
 		responses,
 	}
+
+	job.responseChannel <- response
+
+	return response
 }
