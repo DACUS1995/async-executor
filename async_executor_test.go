@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestSimpleExecutor(t *testing.T) {
+func TestSimpleJobExecutor(t *testing.T) {
 	expected := "Done"
 	queueSize := 10
 	numWorkers := 1
@@ -91,6 +91,35 @@ func TestCompletionMultipleJobsExecutor(t *testing.T) {
 
 	if unfinishedJobsCounter != 0 {
 		t.Errorf("[%v] unfinished jobs are stuck in the executor.", unfinishedJobsCounter)
+	}
+
+	executor.StopExecutor()
+}
+
+func TestSimpleTaskExecutor(t *testing.T) {
+	expected := "Done"
+	queueSize := 10
+	numWorkers := 1
+	testFunction := func(str string) (string, error) {
+		return str, nil
+	}
+
+	executor := NewExecutor(queueSize)
+	executor.StartExecutor(numWorkers)
+
+	taskList := []*Job{}
+
+	for i := 0; i < queueSize; i++ {
+		taskList = append(taskList, executor.CreateTaskJob(
+			testFunction,
+			[]interface{}{expected},
+		))
+	}
+
+	lastJob := executor.CreateTask(taskList)
+
+	if resObj := lastJob.Await(); resObj.responses[0] != expected {
+		t.Errorf("Expected: [%v] | Returned: [%v]", expected, resObj.responses[0])
 	}
 
 	executor.StopExecutor()

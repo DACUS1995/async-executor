@@ -39,6 +39,7 @@ func (worker *Worker) start(wg *sync.WaitGroup) {
 			if !ok {
 				return
 			}
+
 			response := job.call()
 			worker.responseQueue <- response
 		}

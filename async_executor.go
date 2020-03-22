@@ -55,6 +55,43 @@ func (exec *executor) CreateJob(function callableType, parameters []interface{})
 	return newJob
 }
 
+func (exec *executor) CreateTaskJob(function callableType, parameters []interface{}) *Job {
+	newJobID := exec.jobCounter
+	newJob := NewJob(
+		newJobID,
+		function,
+		&parameterObject{parameters},
+	)
+	exec.jobCounter++
+
+	return newJob
+}
+
+func (exec *executor) CreateTask(taskJobList []*Job) *Job {
+	sizeOfTask := len(taskJobList)
+
+	// Iterate over the started workers to search for the most free worker
+	// or the first one that has enough space for all the jobs from the task.
+	bestWorker := exec.workers[0]
+	for _, worker := range exec.workers {
+		currWorkerAvailablity := cap(worker.responseQueue) - len(worker.responseQueue)
+		if currWorkerAvailablity >= sizeOfTask {
+			bestWorker = worker
+			break
+		}
+
+		if currWorkerAvailablity > cap(bestWorker.responseQueue)-len(bestWorker.responseQueue) {
+			bestWorker = worker
+		}
+	}
+
+	for _, job := range taskJobList {
+		bestWorker.jobQueue <- job
+	}
+
+	return taskJobList[len(taskJobList)-1]
+}
+
 func (exec *executor) addGlobalJob(job *Job) {
 	exec.globalJobQueue <- job
 }
