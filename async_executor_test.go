@@ -127,7 +127,7 @@ func TestSimpleTaskExecutor(t *testing.T) {
 
 func Benchmark(b *testing.B) {
 	expected := "Done"
-	queueSize := 10
+	queueSize := 10000
 	numWorkers := 5
 
 	executor := NewExecutor(queueSize)
@@ -148,4 +148,6 @@ func Benchmark(b *testing.B) {
 		if resObj := <-executor.GlobalResponseQueue; resObj.responses[0] != expected {
 		}
 	}
+
+	executor.StopExecutor()
 }
