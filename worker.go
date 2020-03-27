@@ -34,6 +34,11 @@ func (worker *Worker) start(wg *sync.WaitGroup) {
 				return
 			}
 			response := job.call()
+
+			if cap(worker.GlobalResponseQueue)-len(worker.GlobalResponseQueue) == 1 {
+				<-worker.GlobalResponseQueue
+			}
+
 			worker.GlobalResponseQueue <- response
 		case job, ok := <-worker.jobQueue:
 			if !ok {
@@ -41,6 +46,11 @@ func (worker *Worker) start(wg *sync.WaitGroup) {
 			}
 
 			response := job.call()
+
+			if cap(worker.responseQueue)-len(worker.responseQueue) == 1 {
+				<-worker.responseQueue
+			}
+
 			worker.responseQueue <- response
 		}
 	}
