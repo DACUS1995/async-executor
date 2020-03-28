@@ -32,7 +32,7 @@ job := executor.CreateJob(
 returnValue := job.Await()
 fmt.Println(returnValue.Responses[0])
 
-executor.StopExecutor()
+executor.Stop()
 ```
 * Creating an executor and adding a task:
 
@@ -59,5 +59,5 @@ executor.StopExecutor()
 
 	lastJob := executor.CreateTask(taskList)
 	lastJob.Await()
-	executor.StopExecutor()
+	executor.Stop()
 ```

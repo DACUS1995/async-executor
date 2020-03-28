@@ -1,7 +1,9 @@
 package asyncexecutor
 
 import (
+	"fmt"
 	"testing"
+	"time"
 )
 
 func TestSimpleJobExecutor(t *testing.T) {
@@ -22,7 +24,7 @@ func TestSimpleJobExecutor(t *testing.T) {
 		t.Errorf("Expected: [%v] | Returned: [%v]", expected, resObj.Responses[0])
 	}
 
-	executor.StopExecutor()
+	executor.Stop()
 }
 
 func TestMultipleJobsExecutor(t *testing.T) {
@@ -51,7 +53,7 @@ func TestMultipleJobsExecutor(t *testing.T) {
 		}
 	}
 
-	executor.StopExecutor()
+	executor.Stop()
 }
 
 func TestCompletionMultipleJobsExecutor(t *testing.T) {
@@ -93,7 +95,7 @@ func TestCompletionMultipleJobsExecutor(t *testing.T) {
 		t.Errorf("[%v] unfinished jobs are stuck in the executor.", unfinishedJobsCounter)
 	}
 
-	executor.StopExecutor()
+	executor.Stop()
 }
 
 func TestSimpleTaskExecutor(t *testing.T) {
@@ -122,12 +124,39 @@ func TestSimpleTaskExecutor(t *testing.T) {
 		t.Errorf("Expected: [%v] | Returned: [%v]", expected, resObj.Responses[0])
 	}
 
-	executor.StopExecutor()
+	executor.Stop()
+}
+
+func TestWaitAndStopExecutor(t *testing.T) {
+	expected := "Done"
+	queueSize := 10
+	numWorkers := 1
+	testFunction := func(str string) (string, error) {
+		return str, nil
+	}
+
+	executor := NewExecutor(queueSize)
+	executor.StartExecutor(numWorkers)
+
+	for i := 0; i < queueSize; i++ {
+		executor.CreateJob(
+			testFunction,
+			[]interface{}{expected},
+		)
+	}
+
+	time.Sleep(60 * time.Millisecond)
+	numOfJobsWaited := executor.WaitAndStop()
+
+	if numOfJobsWaited != queueSize-1 {
+		t.Errorf("Expected: [%v] | Returned: [%v]", queueSize, numOfJobsWaited)
+	}
 }
 
 func Benchmark(b *testing.B) {
+	fmt.Printf("Benchmark with [%v] elements.", b.N)
 	expected := "Done"
-	queueSize := 10000
+	queueSize := 1000
 	numWorkers := 5
 
 	executor := NewExecutor(queueSize)
@@ -137,17 +166,15 @@ func Benchmark(b *testing.B) {
 		return str, nil
 	}
 
+	var lastJob *Job
 	for i := 0; i < b.N; i++ {
-		executor.CreateJob(
+		lastJob = executor.CreateJob(
 			testFunction,
 			[]interface{}{expected},
 		)
 	}
 
-	for i := 0; i < b.N; i++ {
-		if resObj := <-executor.GlobalResponseQueue; resObj.Responses[0] != expected {
-		}
-	}
+	lastJob.Await()
 
-	executor.StopExecutor()
+	executor.Stop()
 }

@@ -16,7 +16,8 @@ type executor struct {
 type Executor interface {
 	StartExecutor(int)
 	AddGlobalJob(Job)
-	StopExecutor()
+	Stop()
+	WaitAndStop()
 	waitAllWorkers(chan Job)
 }
 
@@ -96,9 +97,24 @@ func (exec *executor) addGlobalJob(job *Job) {
 	exec.globalJobQueue <- job
 }
 
-func (exec *executor) StopExecutor() {
+func (exec *executor) Stop() {
 	exec.waitAllWorkers()
 	return
+}
+
+func (exec *executor) WaitAndStop() int {
+	jobCounter := 0
+
+	for {
+		select {
+		case <-exec.GlobalResponseQueue:
+			jobCounter++
+			// Maybe save the responses somewhere
+		default:
+			exec.Stop()
+			return jobCounter
+		}
+	}
 }
 
 func (exec *executor) waitAllWorkers() {

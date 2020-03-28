@@ -35,6 +35,9 @@ func (worker *Worker) start(wg *sync.WaitGroup) {
 			}
 			response := job.call()
 
+			// Check if the global response queue is full and remove elements to prevent deadlock.
+			// When adding jobs if there is no consumer to remove the result the CreateJob function will block and produce a deadlock.
+			// TODO Make this a configurable action
 			if cap(worker.GlobalResponseQueue)-len(worker.GlobalResponseQueue) == 1 {
 				<-worker.GlobalResponseQueue
 			}
