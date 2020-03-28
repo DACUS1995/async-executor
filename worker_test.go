@@ -28,8 +28,8 @@ func TestSimpleWorker(t *testing.T) {
 	worker.jobQueue <- newJob
 	response := newJob.Await()
 
-	if response.responses[0] != expected {
-		t.Errorf("Expected: [%v] | Returned: [%v]", expected, response.responses[0])
+	if response.Responses[0] != expected {
+		t.Errorf("Expected: [%v] | Returned: [%v]", expected, response.Responses[0])
 	}
 
 	worker.stop()

@@ -30,7 +30,7 @@ job := executor.CreateJob(
 )
 
 returnValue := job.Await()
-fmt.Println(returnValue.responses[0])
+fmt.Println(returnValue.Responses[0])
 
 executor.StopExecutor()
 ```

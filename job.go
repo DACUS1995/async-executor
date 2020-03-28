@@ -10,7 +10,7 @@ type parameterObject struct {
 
 type ResponseObject struct {
 	id        int
-	responses []interface{}
+	Responses []interface{}
 }
 
 type CallableJob interface {
@@ -51,18 +51,18 @@ func (job *Job) call() *ResponseObject {
 	}
 
 	returnValues := reflectedFunc.Call(params)
-	responses := []interface{}{}
+	Responses := []interface{}{}
 
 	for _, value := range returnValues {
-		responses = append(responses, value.Interface())
+		Responses = append(Responses, value.Interface())
 	}
 
-	response := &ResponseObject{
+	job.response = &ResponseObject{
 		job.id,
-		responses,
+		Responses,
 	}
 
-	job.responseChannel <- response
+	job.responseChannel <- job.response
 
-	return response
+	return job.response
 }

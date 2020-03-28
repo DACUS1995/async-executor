@@ -18,8 +18,8 @@ func TestSimpleJobExecutor(t *testing.T) {
 		[]interface{}{"Done"},
 	)
 
-	if resObj := <-executor.GlobalResponseQueue; resObj.responses[0] != expected {
-		t.Errorf("Expected: [%v] | Returned: [%v]", expected, resObj.responses[0])
+	if resObj := <-executor.GlobalResponseQueue; resObj.Responses[0] != expected {
+		t.Errorf("Expected: [%v] | Returned: [%v]", expected, resObj.Responses[0])
 	}
 
 	executor.StopExecutor()
@@ -46,8 +46,8 @@ func TestMultipleJobsExecutor(t *testing.T) {
 	}
 
 	for i := 0; i < numJobs; i++ {
-		if resObj := <-executor.GlobalResponseQueue; resObj.responses[0] != expected {
-			t.Errorf("Expected: [%v] | Returned: [%v]", expected, resObj.responses[0])
+		if resObj := <-executor.GlobalResponseQueue; resObj.Responses[0] != expected {
+			t.Errorf("Expected: [%v] | Returned: [%v]", expected, resObj.Responses[0])
 		}
 	}
 
@@ -77,7 +77,7 @@ func TestCompletionMultipleJobsExecutor(t *testing.T) {
 	}
 
 	for i := 0; i < numJobs; i++ {
-		if resObj := <-executor.GlobalResponseQueue; resObj.responses[0] != expected {
+		if resObj := <-executor.GlobalResponseQueue; resObj.Responses[0] != expected {
 			jobs[resObj.id] = true
 		}
 	}
@@ -118,8 +118,8 @@ func TestSimpleTaskExecutor(t *testing.T) {
 
 	lastJob := executor.CreateTask(taskList)
 
-	if resObj := lastJob.Await(); resObj.responses[0] != expected {
-		t.Errorf("Expected: [%v] | Returned: [%v]", expected, resObj.responses[0])
+	if resObj := lastJob.Await(); resObj.Responses[0] != expected {
+		t.Errorf("Expected: [%v] | Returned: [%v]", expected, resObj.Responses[0])
 	}
 
 	executor.StopExecutor()
@@ -145,7 +145,7 @@ func Benchmark(b *testing.B) {
 	}
 
 	for i := 0; i < b.N; i++ {
-		if resObj := <-executor.GlobalResponseQueue; resObj.responses[0] != expected {
+		if resObj := <-executor.GlobalResponseQueue; resObj.Responses[0] != expected {
 		}
 	}
 

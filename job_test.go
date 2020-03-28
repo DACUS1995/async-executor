@@ -17,7 +17,7 @@ func TestSimpleJob(t *testing.T) {
 	newJob.call()
 	response := newJob.Await()
 
-	if response.responses[0] != expected {
-		t.Errorf("Expected: [%v] | Returned: [%v]", expected, response.responses[0])
+	if response.Responses[0] != expected {
+		t.Errorf("Expected: [%v] | Returned: [%v]", expected, response.Responses[0])
 	}
 }
