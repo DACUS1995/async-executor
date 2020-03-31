@@ -2,4 +2,4 @@ language: go
 go: 
   - 1.13
 script: 
-  - go test -v ./...
+  - go test -v -race ./... # Run all the tests with the race detector enabled
