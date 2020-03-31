@@ -11,6 +11,7 @@ type Worker struct {
 	GlobalResponseQueue chan *ResponseObject
 	jobQueue            chan *Job
 	responseQueue       chan *ResponseObject
+	responseHandler     ResponseHandler
 }
 
 func NewWorker(workerID int, globalJobQueue chan *Job, GlobalResponseQueue chan *ResponseObject) *Worker {
@@ -19,7 +20,8 @@ func NewWorker(workerID int, globalJobQueue chan *Job, GlobalResponseQueue chan 
 		globalJobQueue,
 		GlobalResponseQueue,
 		make(chan *Job, 10),
-		make(chan *ResponseObject, 10)}
+		make(chan *ResponseObject, 10),
+		&CleaningHandler{}}
 }
 
 func (worker *Worker) start(wg *sync.WaitGroup) {
@@ -39,7 +41,7 @@ func (worker *Worker) start(wg *sync.WaitGroup) {
 			// When adding jobs if there is no consumer to remove the result the CreateJob function will block and produce a deadlock.
 			// TODO Make this a configurable action
 			if cap(worker.GlobalResponseQueue)-len(worker.GlobalResponseQueue) == 1 {
-				<-worker.GlobalResponseQueue
+				worker.responseHandler.Handle(<-worker.GlobalResponseQueue)
 			}
 
 			worker.GlobalResponseQueue <- response
@@ -51,7 +53,7 @@ func (worker *Worker) start(wg *sync.WaitGroup) {
 			response := job.call()
 
 			if cap(worker.responseQueue)-len(worker.responseQueue) == 1 {
-				<-worker.responseQueue
+				worker.responseHandler.Handle(<-worker.responseQueue)
 			}
 
 			worker.responseQueue <- response
