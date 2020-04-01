@@ -6,12 +6,13 @@ import (
 )
 
 type Worker struct {
-	id                  int
-	globalJobQueue      chan *Job
-	GlobalResponseQueue chan *ResponseObject
-	jobQueue            chan *Job
-	responseQueue       chan *ResponseObject
-	responseHandler     ResponseHandler
+	id                     int
+	globalJobQueue         chan *Job
+	GlobalResponseQueue    chan *ResponseObject
+	jobQueue               chan *Job
+	responseQueue          chan *ResponseObject
+	responseHandler        ResponseHandler
+	responseHandlerEnabled bool
 }
 
 func NewWorker(workerID int, globalJobQueue chan *Job, GlobalResponseQueue chan *ResponseObject) *Worker {
@@ -21,7 +22,12 @@ func NewWorker(workerID int, globalJobQueue chan *Job, GlobalResponseQueue chan 
 		GlobalResponseQueue,
 		make(chan *Job, 10),
 		make(chan *ResponseObject, 10),
-		&CleaningHandler{}}
+		&CleaningHandler{},
+		true}
+}
+
+func (worker *Worker) AddResponseHandler(handler ResponseHandler) {
+	worker.responseHandler = handler
 }
 
 func (worker *Worker) start(wg *sync.WaitGroup) {
@@ -39,12 +45,13 @@ func (worker *Worker) start(wg *sync.WaitGroup) {
 
 			// Check if the global response queue is full and remove elements to prevent deadlock.
 			// When adding jobs if there is no consumer to remove the result the CreateJob function will block and produce a deadlock.
-			// TODO Make this a configurable action
-			if cap(worker.GlobalResponseQueue)-len(worker.GlobalResponseQueue) == 1 {
-				worker.responseHandler.Handle(<-worker.GlobalResponseQueue)
+			if worker.responseHandlerEnabled == true {
+				if cap(worker.GlobalResponseQueue)-len(worker.GlobalResponseQueue) == 1 {
+					worker.responseHandler.Handle(<-worker.GlobalResponseQueue)
+				}
 			}
-
 			worker.GlobalResponseQueue <- response
+
 		case job, ok := <-worker.jobQueue:
 			if !ok {
 				return
@@ -52,10 +59,11 @@ func (worker *Worker) start(wg *sync.WaitGroup) {
 
 			response := job.call()
 
-			if cap(worker.responseQueue)-len(worker.responseQueue) == 1 {
-				worker.responseHandler.Handle(<-worker.responseQueue)
+			if worker.responseHandlerEnabled == true {
+				if cap(worker.responseQueue)-len(worker.responseQueue) == 1 {
+					worker.responseHandler.Handle(<-worker.responseQueue)
+				}
 			}
-
 			worker.responseQueue <- response
 		}
 	}

@@ -80,7 +80,7 @@ func TestCompletionMultipleJobsExecutor(t *testing.T) {
 
 	for i := 0; i < numJobs; i++ {
 		if resObj := <-executor.GlobalResponseQueue; resObj.Responses[0] != expected {
-			jobs[resObj.id] = true
+			jobs[resObj.ID] = true
 		}
 	}
 

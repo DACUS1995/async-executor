@@ -9,7 +9,7 @@ type parameterObject struct {
 }
 
 type ResponseObject struct {
-	id        int
+	ID        int
 	Responses []interface{}
 }
 

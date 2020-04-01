@@ -93,6 +93,18 @@ func (exec *executor) CreateTask(taskJobList []*Job) *Job {
 	return taskJobList[len(taskJobList)-1]
 }
 
+func (exec *executor) SetResponseHandler(handler ResponseHandler) {
+	for _, worker := range exec.workers {
+		worker.AddResponseHandler(handler)
+	}
+}
+
+func (exec *executor) SetStatusResponseHandler(enabled bool) {
+	for _, worker := range exec.workers {
+		worker.responseHandlerEnabled = enabled
+	}
+}
+
 func (exec *executor) addGlobalJob(job *Job) {
 	exec.globalJobQueue <- job
 }
