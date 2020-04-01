@@ -56,39 +56,39 @@ executor.Stop()
 * Creating an executor and adding a task:
 
 ```go
-	queueSize := 10
-	numWorkers := 1
+queueSize := 10
+numWorkers := 1
 
-	testFunction := func(str string) (string, error) {
-		return str, nil
-	}
+testFunction := func(str string) (string, error) {
+	return str, nil
+}
 
 
-	executor := NewExecutor(queueSize)
-	executor.StartExecutor(numWorkers)
+executor := NewExecutor(queueSize)
+executor.StartExecutor(numWorkers)
 
-	taskList := []*Job{}
+taskList := []*Job{}
 
-	for i := 0; i < queueSize; i++ {
-		taskList = append(taskList, executor.CreateTaskJob(
-			testFunction,
-			[]interface{}{expected},
-		))
-	}
+for i := 0; i < queueSize; i++ {
+	taskList = append(taskList, executor.CreateTaskJob(
+		testFunction,
+		[]interface{}{expected},
+	))
+}
 
-	lastJob := executor.CreateTask(taskList)
-	lastJob.Await()
-	executor.Stop()
+lastJob := executor.CreateTask(taskList)
+lastJob.Await()
+executor.Stop()
 ```
 
 * You can add a custom job response handler that can be used to save, logg, send, etc. the responses by implementic the ResponseHandler interface:
 
 ```go
-	type CustomHandler struct{}
+type CustomHandler struct{}
 
-	func (*CustomHandler) Handle(response *ResponseObject) {
-		fmt.Printf("Finished job: %v", response.ID)
-	}
+func (*CustomHandler) Handle(response *ResponseObject) {
+	fmt.Printf("Finished job: %v", response.ID)
+}
 
-	executor.SetResponseHandler(&CustomHandler{})
+executor.SetResponseHandler(&CustomHandler{})
 ```
