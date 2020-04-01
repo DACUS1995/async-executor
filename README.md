@@ -12,6 +12,25 @@ Every worker has access to two job queues, one shared and one private. The priva
 
 When waiting for the result there are two options: call `Await()` on that job or search for job's id in the executor GlobalResponseQueue.
 
+#### Installation
+After making sure that Go is installed on your device.
+You can use the following command in your terminal:
+
+	go get github.com/DACUS1005/async-executor
+
+
+#### Import package
+Add following line in your `*.go` file:
+```go
+import "github.com/DACUS1005/async-executor"
+```
+If you are unhappy to use long `govalidator`, you can do something like this:
+```go
+import (
+	async "github.com/DACUS1005/async-executor"
+)
+```
+
 ## Basic instructions
 
 * Creating an executor and adding a job:
@@ -60,4 +79,16 @@ executor.Stop()
 	lastJob := executor.CreateTask(taskList)
 	lastJob.Await()
 	executor.Stop()
+```
+
+* You can add a custom job response handler that can be used to save, logg, send, etc. the responses by implementic the ResponseHandler interface:
+
+```go
+	type CustomHandler struct{}
+
+	func (*CustomHandler) Handle(response *ResponseObject) {
+		fmt.Printf("Finished job: %v", response.ID)
+	}
+
+	executor.SetResponseHandler(&CustomHandler{})
 ```
