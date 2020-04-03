@@ -95,7 +95,7 @@ func (exec *executor) CreateTask(taskJobList []*Job) *Job {
 
 func (exec *executor) SetResponseHandler(handler ResponseHandler) {
 	for _, worker := range exec.workers {
-		worker.AddResponseHandler(handler)
+		worker.SetResponseHandler(handler)
 	}
 }
 

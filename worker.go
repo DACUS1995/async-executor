@@ -26,7 +26,7 @@ func NewWorker(workerID int, globalJobQueue chan *Job, GlobalResponseQueue chan 
 		true}
 }
 
-func (worker *Worker) AddResponseHandler(handler ResponseHandler) {
+func (worker *Worker) SetResponseHandler(handler ResponseHandler) {
 	worker.responseHandler = handler
 }
 
@@ -71,5 +71,18 @@ func (worker *Worker) start(wg *sync.WaitGroup) {
 
 func (worker *Worker) stop() {
 	fmt.Printf("Stopping worker [id = %v] \n", worker.id)
+
+	if worker.responseHandlerEnabled == true {
+		for {
+			response, ok := <-worker.GlobalResponseQueue
+
+			if ok {
+				worker.responseHandler.Handle(response)
+			} else {
+				break
+			}
+		}
+	}
+
 	close(worker.jobQueue)
 }
