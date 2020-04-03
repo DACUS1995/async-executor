@@ -83,7 +83,6 @@ func (worker *Worker) stop() {
 					break
 				}
 			default:
-				fmt.Println("Here")
 				break loop
 			}
 		}
