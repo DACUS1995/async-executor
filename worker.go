@@ -73,13 +73,18 @@ func (worker *Worker) stop() {
 	fmt.Printf("Stopping worker [id = %v] \n", worker.id)
 
 	if worker.responseHandlerEnabled == true {
+	loop:
 		for {
-			response, ok := <-worker.GlobalResponseQueue
-
-			if ok {
-				worker.responseHandler.Handle(response)
-			} else {
-				break
+			select {
+			case response, ok := <-worker.GlobalResponseQueue:
+				if ok {
+					worker.responseHandler.Handle(response)
+				} else {
+					break
+				}
+			default:
+				fmt.Println("Here")
+				break loop
 			}
 		}
 	}
