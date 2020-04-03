@@ -81,7 +81,7 @@ lastJob.Await()
 executor.Stop()
 ```
 
-* You can add a custom job response handler that can be used to save, logg, send, etc. the responses by implementic the ResponseHandler interface:
+* You can add a custom job response handler that can be used to save, log, send, etc. the responses by implementing the ResponseHandler interface:
 
 ```go
 type CustomHandler struct{}
