@@ -6,7 +6,7 @@ import (
 
 func TestSimpleJob(t *testing.T) {
 	expected := "Done"
-	newJob := NewJob(
+	newJob, _ := NewJob(
 		/*id*/ 0,
 		func(str string) (string, error) {
 			return str, nil

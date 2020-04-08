@@ -71,7 +71,7 @@ func TestCompletionMultipleJobsExecutor(t *testing.T) {
 	}
 
 	for i := 0; i < numJobs; i++ {
-		newJob := executor.CreateJob(
+		newJob, _ := executor.CreateJob(
 			testFunction,
 			[]interface{}{"Done"},
 		)
@@ -112,10 +112,16 @@ func TestSimpleTaskExecutor(t *testing.T) {
 	taskList := []*Job{}
 
 	for i := 0; i < queueSize; i++ {
-		taskList = append(taskList, executor.CreateTaskJob(
+		newTaskJob, err := executor.CreateTaskJob(
 			testFunction,
 			[]interface{}{expected},
-		))
+		)
+
+		if err != nil {
+			t.Errorf("Failed to create job.")
+		}
+
+		taskList = append(taskList, newTaskJob)
 	}
 
 	lastJob := executor.CreateTask(taskList)
@@ -168,7 +174,7 @@ func Benchmark(b *testing.B) {
 
 	var lastJob *Job
 	for i := 0; i < b.N; i++ {
-		lastJob = executor.CreateJob(
+		lastJob, _ = executor.CreateJob(
 			testFunction,
 			[]interface{}{expected},
 		)

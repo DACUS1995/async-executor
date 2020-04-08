@@ -1,6 +1,7 @@
 package asyncexecutor
 
 import (
+	"errors"
 	"reflect"
 )
 
@@ -27,14 +28,23 @@ type Job struct {
 	callable        callableType
 }
 
-func NewJob(id int, function callableType, paramObject *parameterObject) *Job {
+func NewJob(id int, function callableType, paramObject *parameterObject) (*Job, error) {
+	if function == nil {
+		return nil, errors.New("Callable cannot be nil")
+	}
+
+	funcV := reflect.ValueOf(function)
+	if funcV.Kind() != reflect.Func {
+		return nil, errors.New("Callable argument must be a function")
+	}
+
 	return &Job{
 		id,
 		paramObject,
 		new(ResponseObject),
 		make(chan *ResponseObject, 1),
 		function,
-	}
+	}, nil
 }
 
 func (job *Job) Await() *ResponseObject {

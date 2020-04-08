@@ -43,29 +43,38 @@ func (exec *executor) StartExecutor(numWorkers int) {
 	return
 }
 
-func (exec *executor) CreateJob(function callableType, parameters []interface{}) *Job {
+func (exec *executor) CreateJob(function callableType, parameters []interface{}) (*Job, error) {
 	newJobID := exec.jobCounter
-	newJob := NewJob(
+	newJob, err := NewJob(
 		newJobID,
 		function,
 		&parameterObject{parameters},
 	)
+
+	if err != nil {
+		return nil, err
+	}
+
 	exec.addGlobalJob(newJob)
 	exec.jobCounter++
 
-	return newJob
+	return newJob, nil
 }
 
-func (exec *executor) CreateTaskJob(function callableType, parameters []interface{}) *Job {
+func (exec *executor) CreateTaskJob(function callableType, parameters []interface{}) (*Job, error) {
 	newJobID := exec.jobCounter
-	newJob := NewJob(
+	newJob, err := NewJob(
 		newJobID,
 		function,
 		&parameterObject{parameters},
 	)
-	exec.jobCounter++
 
-	return newJob
+	if err != nil {
+		return nil, err
+	}
+
+	exec.jobCounter++
+	return newJob, nil
 }
 
 func (exec *executor) CreateTask(taskJobList []*Job) *Job {
