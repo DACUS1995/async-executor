@@ -16,7 +16,7 @@ When waiting for the result there are two options: call `Await()` on that job or
 After making sure that Go is installed on your device.
 You can use the following command in your terminal:
 
-	go get github.com/DACUS1005/async-executor
+	go get github.com/DACUS1995/async-executor
 
 
 #### Import package
