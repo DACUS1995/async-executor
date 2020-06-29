@@ -10,13 +10,13 @@ By simply adding a new job to the executor, that job is inserted in a queue that
 
 Every worker has access to two job queues, one shared and one private. The private queue is used by jobs tasks to ensure the sequential execution of the provided functions.
 
-When waiting for the result there are two options: call `Await()` on that job or search for job's id in the executor GlobalResponseQueue.
+When waiting for the result there are two options: call `Await()` on that job or keep searching for job's id in the executor GlobalResponseQueue.
 
 #### Installation
 After making sure that Go is installed on your device.
 You can use the following command in your terminal:
 
-	go get github.com/DACUS1005/async-executor
+	go get github.com/DACUS1995/async-executor
 
 
 #### Import package
@@ -24,7 +24,7 @@ Add following line in your `*.go` file:
 ```go
 import "github.com/DACUS1005/async-executor"
 ```
-If you are unhappy to use long `govalidator`, you can do something like this:
+If you are unhappy to use long `asyncexecutor`, you can do something like this:
 ```go
 import (
 	async "github.com/DACUS1005/async-executor"
