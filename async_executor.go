@@ -2,6 +2,8 @@ package asyncexecutor
 
 import (
 	"sync"
+
+	"github.com/pkg/errors"
 )
 
 type executor struct {
@@ -52,7 +54,7 @@ func (exec *executor) CreateJob(function callableType, parameters []interface{})
 	)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Job creation failed.")
 	}
 
 	exec.addGlobalJob(newJob)
@@ -70,7 +72,7 @@ func (exec *executor) CreateTaskJob(function callableType, parameters []interfac
 	)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Job creation failed.")
 	}
 
 	exec.jobCounter++
